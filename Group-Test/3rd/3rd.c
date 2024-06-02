@@ -1,2 +1,0 @@
-Anup Thapa
-Anush Pradhan
