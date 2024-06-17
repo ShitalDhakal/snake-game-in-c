@@ -30,7 +30,7 @@ int main() {
     do {
 
 
-        printf("\t\t\t\t\t\tWelcome to Demo Project\n");
+        printf("\t\t\t\t\t\tWelcome to snake game Project\n");
         printf("\t\t\t\t\t 1. Game Instruction\n");
         printf("\t\t\t\t\t 2. Start Game\n");
         printf("\t\t\t\t\t 3. Check High Score\n");
