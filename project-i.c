@@ -171,21 +171,21 @@ void startGame() {
                 case 72:
                     move(x, y, &l, c, len);
                     gotoxy(x[0], --y[0]);
-                    printf("%c", 220);
+                    printf("^");
                     if (y[0] == 0 || (level >= 2 && (y[0] == 10 || y[0] == 20) && x[0] >= 10 && x[0] <= 110) || (level == 3 && (y[0] == 5 || y[0] == 25) && x[0] >= 15 && x[0] <= 105))
                         over(x[0], y[0], len);
                     break;
                 case 75:
                     move(x, y, &l, c, len);
                     gotoxy(x[0] = x[0] - 2, y[0]);
-                    printf("");
+                    printf("<");
                     if (x[0] == 0 || (level >= 2 && (x[0] == 10 || x[0] == 110) && y[0] >= 10 && y[0] <= 20) || (level == 3 && (x[0] == 15 || x[0] == 105) && y[0] >= 5 && y[0] <= 25))
                         over(x[0], y[0], len);
                     break;
                 case 77:
                     move(x, y, &l, c, len);
                     gotoxy(x[0] = x[0] + 2, y[0]);
-                    printf("%c", 220);
+                    printf(">");
                     if (x[0] == 119 || (level >= 2 && (x[0] == 10 || x[0] == 110) && y[0] >= 10 && y[0] <= 20) || (level == 3 && (x[0] == 15 || x[0] == 105) && y[0] >= 5 && y[0] <= 25))
                         over(x[0], y[0], len);
                     break;
@@ -276,5 +276,4 @@ int main() {
     } while (option != 5);
     return 0;
 }
-
 
