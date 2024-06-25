@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include<stdlib.h>
+#define HIGHSCORE_FILE "highscore.txt"
+//function to read the high score from the file
+int readHighScore()
+{
+File*file=fopen(HIGHSCORE_FILE, "r");
+if(file==NULL){//file does not exist,return 0as default high score
+return 0;
+}
+int highscore;
+fscanf(file, "%d", highscore);
+fclose(file);
+
+}
+//function to write highscore in a file
+void writeHighScore(int highscore) {
+	FILE *file=fopen(HIGHSCORE_FILE, "w");
+	if(file==NULL) {
+		printf("Eroor opening high score filefor writing!\n");
+		return;
+	}
+	fprintf(file, "%d", highscore);
+fclose(file);
+	
+}
+//function to update the high score if current score is greater
+void updateHighScore(int currentscore) {
+	int highscore = readHighScore();
+	if(currentscore > highscore){
+		printf("New high score: %d!\n");
+		
+	}
+	else{printf("Current high score remains: %d\n", highscore);
+	
+	}
+}
+//main function starts
+int main()
+{
+int playerscore;
+printf("Enter the player score:");
+scanf("%d",&playerscore);
+return 0;
+}
