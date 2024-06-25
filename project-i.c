@@ -5,7 +5,7 @@
 #include <conio.h>
 
 int i;
-int level = 1; // Add a global variable to store the game level
+int level = 1; // Global variable to store the game level
 
 void displayInstructions() {
     system("cls");
@@ -25,61 +25,110 @@ void gotoxy(int x, int y) {
     p.Y = y;
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), p);
 }
-
 void boundary() {
+    int startX = 5; // Starting x position to center the boundary horizontally
+    int startY = 1;  // Starting y position to center the boundary vertically
+    int width = 110;  // Width of the boundary
+    int height = 25; // Height of the boundary
     system("cls");
+
     // Draw top boundary
+    gotoxy(startX, startY);
     printf("%c", 201);
-    for (i = 1; i < 119; i++) {
+    for (i = 1; i < width; i++) {
         printf("%c", 205);
     }
     printf("%c", 187);
 
     // Draw side boundaries
-    for (i = 1; i < 29; i++) {
-        gotoxy(0, i);
+    for (i = 1; i < height; i++) {
+        gotoxy(startX, startY + i);
         printf("%c", 186);
-        gotoxy(119, i);
+        gotoxy(startX + width, startY + i);
         printf("%c", 186);
     }
 
     // Draw bottom boundary
-    gotoxy(0, 29);
+    gotoxy(startX, startY + height);
     printf("%c", 200);
-    for (i = 1; i < 119; i++) {
+    for (i = 1; i < width; i++) {
         printf("%c", 205);
     }
     printf("%c", 188);
+}
 
-    // Add inner boundary for level 2
-    if (level >= 2) {
-        for (i = 10; i < 110; i++) {
-            gotoxy(i, 10);
-            printf("%c", 205);
-            gotoxy(i, 20);
-            printf("%c", 205);
-        }
-        for (i = 10; i < 20; i++) {
-            gotoxy(10, i);
-            printf("%c", 186);
-            gotoxy(110, i);
-            printf("%c", 186);
-        }
-    }
+void drawWalls(int level) {
+    int startX = 5; // Starting x position to center the boundary horizontally
+    int startY = 1;  // Starting y position to center the boundary vertically
 
-    // Add additional obstacles for level 3
-    if (level == 3) {
-        for (i = 15; i < 105; i++) {
-            gotoxy(i, 5);
-            printf("%c", 205);
-            gotoxy(40, 25);
-            printf("%c", 205);
+    // Adjustments for different levels
+    if (level == 2) {
+        // Draw walls for medium level
+        for (i = startX + 10; i < startX + 30; i++) {
+            gotoxy(i, startY + 5);
+            printf("%c", 220);
+            gotoxy(i, startY + 20);
+            printf("%c", 220);
         }
-        for (i = 5; i < 25; i++) {
-            gotoxy(15, i);
-            printf("%c", 186);
-            gotoxy(105, 78);
-            printf("%c", 186);
+        for (i = startX + 30; i < startX + 52; i++) {
+            gotoxy(i, startY + 13);
+            printf("%c", 220);
+		}
+		for (i = startX + 58 ; i < startX + 80; i++) {
+            gotoxy(i, startY + 13);
+            printf("%c", 220);
+        }
+        for (i = startX + 80; i < startX + 100 ; i++) {
+            gotoxy(i, startY + 5);
+            printf("%c", 220);
+            gotoxy(i, startY + 20);
+            printf("%c", 220);
+        }
+        for (i = startY + 8 ; i < startY + 18; i++) {
+            gotoxy(startX + 20, i);
+            printf("%c", 219);
+            gotoxy(startX + 90, i);
+            printf("%c", 219);
+        }
+    } else if (level == 3) {
+        // Draw walls for hard level
+        for (i = startX + 11; i < startX + 40; i++) {
+            gotoxy(i, startY + 5);
+            printf("%c", 220);
+            gotoxy(i, startY + 20);
+            printf("%c", 220);
+        }
+         for (i = startX + 70; i < startX + 100; i++) {
+            gotoxy(i, startY + 5);
+            printf("%c", 220);
+            gotoxy(i, startY + 20);
+            printf("%c", 220);
+        }
+         for (i = startY + 6; i < startY + 11; i++) {
+            gotoxy(startX + 11, i);
+            printf("%c", 219);
+            gotoxy(startX + 99, i);
+            printf("%c", 219);
+        }
+           for (i = startY + 13; i < startY + 19; i++) {
+            gotoxy(startX + 11, i);
+            printf("%c", 219);
+            gotoxy(startX + 99, i);
+            printf("%c", 219);
+        }
+        for (i = startY + 8 ; i < startY + 18; i++) {
+            gotoxy(startX + 40, i);
+            printf("%c", 219);
+            gotoxy(startX + 70, i);
+            printf("%c", 219);
+        }
+          for (i = startY + 2; i < startY + 11; i++) {
+            gotoxy(startX + 55, i);
+            printf("%c", 219);
+        }
+           for (i = startY + 14; i < startY + 23; i++) {
+            gotoxy(startX + 55, i);
+            printf("%c", 219);
         }
     }
 }
@@ -107,6 +156,19 @@ int check(int px, int py, int *x, int *y, int len) {
     return 0;
 }
 
+int checkWallCollision(int x, int y, int level) {
+    if (level == 2) {
+        if ((x >= 10 && x < 30 && (y == 10 || y == 20))) {
+            return 1;
+        }
+    } else if (level == 3) {
+        if ((x >= 10 && x < 30 && (y == 10 || y == 20)) || (x >= 50 && x < 70 && (y == 5 || y == 25))) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void over(int x, int y, int len) {
     gotoxy(80, 29);
     printf("%c", 254);
@@ -118,19 +180,27 @@ void over(int x, int y, int len) {
     exit(0);
 }
 
-void startGame() {
+void playGame() {
     system("cls");
     boundary();
+    drawWalls(level);
     getch();
     srand(time(NULL));
-    int *x, *y, px = ((rand() % 58) * 2) + 3, py = (rand() % 28) + 1, len = 1;
-    char c, l;
+    int *x, *y, px, py, fx, fy, len = 1;
+    char c = 'd', l = 'd';
     clock_t t;
 
     x = (int *)malloc(sizeof(int) * (len + 1));
     y = (int *)malloc(sizeof(int) * (len + 1));
-    x[0] = 25;
-    y[0] = 20;
+
+    // Generate initial snake position
+    do {
+        px = ((rand() % 58) * 2) + 3;
+        py = (rand() % 28) + 1;
+    } while (checkWallCollision(px, py, level));
+
+    x[0] = px;
+    y[0] = py;
 
     gotoxy(px, py);
     printf("0");
@@ -138,13 +208,21 @@ void startGame() {
     gotoxy(x[0], y[0]);
     printf("%c", 247);
 
+    // Generate initial food position
+    do {
+        fx = ((rand() % 58) * 2) + 3;
+        fy = (rand() % 28) + 1;
+    } while (checkWallCollision(fx, fy, level) || check(fx, fy, x, y, len));
+
+    gotoxy(fx, fy);
+    printf("o");
+
     while (1) {
         do {
             t = clock();
-            int delay = 250 / level; // Adjust delay based on level
-            while (clock() < t + delay && !kbhit())
+            while (clock() < t + 250 && !kbhit())
                 ;
-            if (clock() < t + delay) {
+            if (clock() < t + 250) {
                 c = getch();
                 if (c == 75 && l == 77)
                     c = 77;
@@ -161,33 +239,37 @@ void startGame() {
                     break;
                 case 111:
                     break;
-                case 80:
+                case 80: // Down
                     move(x, y, &l, c, len);
                     gotoxy(x[0], ++y[0]);
                     printf("v");
-                    if (y[0] == 29 || (level >= 2 && (y[0] == 10 || y[0] == 20) && x[0] >= 10 && x[0] <= 110) || (level == 3 && (y[0] == 5 || y[0] == 25) && x[0] >= 15 && x[0] <= 105))
+                    if (y[0] >= 29 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                    }
                     break;
-                case 72:
+                case 72: // Up
                     move(x, y, &l, c, len);
                     gotoxy(x[0], --y[0]);
-                    printf("^");
-                    if (y[0] == 0 || (level >= 2 && (y[0] == 10 || y[0] == 20) && x[0] >= 10 && x[0] <= 110) || (level == 3 && (y[0] == 5 || y[0] == 25) && x[0] >= 15 && x[0] <= 105))
+                    printf("%c", 220);
+                    if (y[0] < 1 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                    }
                     break;
-                case 75:
+                case 75: // Left
                     move(x, y, &l, c, len);
                     gotoxy(x[0] = x[0] - 2, y[0]);
-                    printf("<");
-                    if (x[0] == 0 || (level >= 2 && (x[0] == 10 || x[0] == 110) && y[0] >= 10 && y[0] <= 20) || (level == 3 && (x[0] == 15 || x[0] == 105) && y[0] >= 5 && y[0] <= 25))
+                    printf("%c", 223);
+                    if (x[0] < 1 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                    }
                     break;
-                case 77:
+                case 77: // Right
                     move(x, y, &l, c, len);
                     gotoxy(x[0] = x[0] + 2, y[0]);
-                    printf(">");
-                    if (x[0] == 119 || (level >= 2 && (x[0] == 10 || x[0] == 110) && y[0] >= 10 && y[0] <= 20) || (level == 3 && (x[0] == 15 || x[0] == 105) && y[0] >= 5 && y[0] <= 25))
+                    printf("%c", 223);
+                    if (x[0] >= 119 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                    }
                     break;
                 default:
                     break;
@@ -196,7 +278,7 @@ void startGame() {
                 if (x[0] == x[i] && y[0] == y[i])
                     over(x[0], y[0], len);
             }
-        } while (x[0] != px || y[0] != py);
+        } while (x[0] != fx || y[0] != fy);
 
         gotoxy(x[len], y[len]);
         printf("o");
@@ -205,12 +287,13 @@ void startGame() {
         x = (int *)realloc(x, sizeof(int) * (len + 1));
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
+        // Generate new food position
         do {
-            py = (rand() % 28) + 1;
-            px = ((rand() % 58) * 2) + 3;
-        } while (check(px, py, x, y, len));
+            fx = ((rand() % 58) * 2) + 3;
+            fy = (rand() % 28) + 1;
+        } while (checkWallCollision(fx, fy, level) || check(fx, fy, x, y, len));
 
-        gotoxy(px, py);
+        gotoxy(fx, fy);
         printf("o");
     }
 }
@@ -232,9 +315,9 @@ void selectLevel() {
     printf("\t\t\t\t\tEnter your choice: ");
     scanf("%d", &level);
     if (level < 1 || level > 3) {
-        printf("Invalid choice. Setting level to Easy.\n");
-        level = 1;
+        level = 1; // Default to easy if an invalid level is chosen
     }
+    system("cls");
 }
 
 int main() {
@@ -258,7 +341,7 @@ int main() {
                 displayInstructions();
                 break;
             case 2:
-                startGame();
+                playGame();
                 break;
             case 3:
                 checkHighScore();
