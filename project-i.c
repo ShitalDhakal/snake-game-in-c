@@ -7,14 +7,34 @@
 int i;
 int level = 1; // Global variable to store the game level
 
+void displayInstructions();
+void gotoxy(int x, int y);
+void boundary();
+void drawWalls(int level);
+int checkWallCollision(int x, int y, int level);
+void move(int *x, int *y, char *l, char c, int len);
+int check(int px, int py, int *x, int *y, int len);
+void over(int x, int y, int len);
+void playGame();
+void checkHighScore();
+void selectLevel(); 
+
 void displayInstructions() {
     system("cls");
-    printf("\t\t\t\t\tGame Instructions:\n");
-    printf("-> Use arrow keys to move the snake.\n");
-    printf("-> You will be provided foods at several coordinates of the screen which you have to eat. Every time you eat a food the length of the snake will be increased by 1 element and thus the score.\n");
-    printf("-> You are provided with three lives. Your life will decrease as you hit the wall or snake's body.\n");
-    printf("-> You can pause the game in its middle by pressing any key. To continue the paused game press any other key once again.\n");
-    printf("\nPress any key to go back to the menu...");
+    printf("\t\t\t\t\t\tGame Instructions:\n\n");
+    printf("\t 1. Use the arrow keys to move the snake:\n");
+    printf("\t\t- Up Arrow: Move Up\n");
+    printf("\t\t- Down Arrow: Move Down\n");
+    printf("\t\t- Left Arrow: Move Left\n");
+    printf("\t\t- Right Arrow: Move Right\n\n");
+    printf("\t 2. Eat the food (%c) to grow your snake and increase your score.\n\n", 148);
+    printf("\t 3. Avoid hitting the walls and the snake's own body to prevent the game from ending.\n\n");
+    printf("\t 4. Pause the game at any time by pressing any key. Press any key again to resume.\n\n");
+    printf("\t 5. Select the game level at the beginning:\n");
+    printf("\t\t- Easy: no any obstacles .\n");
+    printf("\t\t- Medium: obstacles.\n");
+    printf("\t\t- Hard: more obstacles.\n\n");
+    printf("\t Press any key to return to the main menu...");
     getch();  // Wait for user input
     system("cls");
 }
@@ -131,6 +151,7 @@ void drawWalls(int level) {
         }
     }
 }
+
 int checkWallCollision(int x, int y, int level) {
     // Define wall segments for level 2 and level 3
     if (level == 2) {
@@ -184,12 +205,32 @@ void over(int x, int y, int len) {
     printf("Game Over!!!\n");
     gotoxy(59,15);
     printf("%cScore : %d   ", 179, len - 4);
-    while (getch() != 13);
+    getch();
     exit(0);
+}
+
+void selectLevel() {
+    int choice;
+    do {
+        system("cls");
+        printf("\t\t\t\t\t\tSelect Level\n\n");
+        printf("\t\t\t\t\t 1. Easy\n\n");
+        printf("\t\t\t\t\t 2. Medium\n\n");
+        printf("\t\t\t\t\t 3. Hard\n\n");
+        printf("\t\t\t\t\t Enter your choice: ");
+        scanf("%d", &choice);
+        if (choice >= 1 && choice <= 3) {
+            level = choice;
+        } else {
+            printf("Invalid choice. Please enter a number between 1 and 3.\n");
+            getch(); // Wait for user input
+        }
+    } while (choice < 1 || choice > 3);
 }
 
 void playGame() {
     system("cls");
+    selectLevel();
     boundary();
     drawWalls(level);
     srand(time(NULL));
@@ -282,11 +323,7 @@ void playGame() {
                     over(x[0], y[0], len);
             }
         } while (x[0] != fx || y[0] != fy);
-
-        gotoxy(x[len], y[len]);
-       // printf("o");
-        len++;
-
+        
         x = (int *)realloc(x, sizeof(int) * (len + 1));
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
@@ -304,23 +341,9 @@ void playGame() {
 
 void checkHighScore() {
     system("cls");
-    printf("\t\t\t\t\tChecking High Score.....\n");
+    printf("\t\t\t\t\tChecking High Score.....\n\n");
     printf("\nPress any key to go back to the menu...");
     getch();  // Wait for user input
-    system("cls");
-}
-
-void selectLevel() {
-    system("cls");
-    printf("\t\t\t\t\tSelect Game Level:\n");
-    printf("\t\t\t\t\t1. Easy\n");
-    printf("\t\t\t\t\t2. Medium\n");
-    printf("\t\t\t\t\t3. Hard\n");
-    printf("\t\t\t\t\tEnter your choice: ");
-    scanf("%d", &level);
-    if (level < 1 || level > 3) {
-        level = 1; // Default to easy if an invalid level is chosen
-    }
     system("cls");
 }
 
@@ -332,12 +355,11 @@ int main() {
     scanf("%s", name);
     do {
         system("cls");
-        printf("\t\t\t\t\t\tWelcome to Demo Project\n");
-        printf("\t\t\t\t\t 1. Game Instruction\n");
-        printf("\t\t\t\t\t 2. Start Game\n");
-        printf("\t\t\t\t\t 3. Check High Score\n");
-        printf("\t\t\t\t\t 4. Select Level\n");
-        printf("\t\t\t\t\t 5. Exit\n");
+        printf("\t\t\t\t\tWelcome to Snake Game\n\n");
+        printf("\t\t\t\t\t 1. Game Instruction\n\n");
+        printf("\t\t\t\t\t 2. Play Game\n\n");
+        printf("\t\t\t\t\t 3. Check High Score\n\n");
+        printf("\t\t\t\t\t 4. Exit\n\n"); 
         printf("\t\t\t\t\t Enter your choice: ");
         scanf("%d", &option);
         switch (option) {
@@ -347,20 +369,14 @@ int main() {
             case 2:
                 playGame();
                 break;
-            case 3:
-                checkHighScore();
-                break;
             case 4:
-                selectLevel();
-                break;
-            case 5:
                 printf("\t\t\t\t\tExit\n");
                 break;
             default:
-                printf("Invalid choice. Please enter a number between 1 and 5.\n");
+                printf("Invalid choice. Please enter a number between 1 and 4.\n");
                 break;
         }
-    } while (option != 5);
+    } while (option != 4);
     return 0;
 }
 
