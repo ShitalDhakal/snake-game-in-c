@@ -31,9 +31,9 @@ void displayInstructions() {
     printf("\t 3. Avoid hitting the walls and the snake's own body to prevent the game from ending.\n\n");
     printf("\t 4. Pause the game at any time by pressing any key. Press any key again to resume.\n\n");
     printf("\t 5. Select the game level at the beginning:\n");
-    printf("\t\t- Easy: no any obstacles .\n");
-    printf("\t\t- Medium: obstacles.\n");
-    printf("\t\t- Hard: more obstacles.\n\n");
+    printf("\t\t- Easy: Slower speed at initial increase speed when start eat food.\n");
+    printf("\t- Medium: More obstacles and moderate speed.\n");
+    printf("\t- Hard: Complex obstacles and faster speed.\n\n");
     printf("\t Press any key to return to the main menu...");
     getch();  // Wait for user input
     system("cls");
@@ -187,7 +187,7 @@ void move(int *x, int *y, char *l, char c, int len) {
     *l = c;
     if (len > 1) {
         gotoxy(x[1], y[1]);
-        printf("%c", 223);
+        printf("%c",254);
     }
 }
 
@@ -237,6 +237,20 @@ void playGame() {
     int *x, *y, px, py, fx, fy, len = 4;
     char c = 'd', l = 'd';
     clock_t t;
+    int speed_easy = 200; // Initial speed for easy level
+    int speed_medium =170; // Initial speed for medium level
+    int speed_hard = 140; // Initial speed for hard level
+    int food_counter = 0; // Counter to track number of foods eaten
+
+    // Determine initial speed based on level
+    int speed;
+    if (level == 1) {
+        speed = speed_easy;
+    } else if (level == 2) {
+        speed = speed_medium;
+    } else if (level == 3) {
+        speed = speed_hard;
+    }
 
     x = (int *)malloc(sizeof(int) * (len + 1));
     y = (int *)malloc(sizeof(int) * (len + 1));
@@ -266,8 +280,8 @@ void playGame() {
     while (1) {
         do {
             t = clock();
-            while (clock() < t + 250 && !kbhit());
-            if (clock() < t + 250) {
+            while (clock() < t + speed && !kbhit());
+            if (clock() < t + speed) {
                 c = getch();
                 if (c == 75 && l == 77)
                     c = 77;
@@ -324,6 +338,9 @@ void playGame() {
             }
         } while (x[0] != fx || y[0] != fy);
         
+        gotoxy(x[len], y[len]);
+        len++;
+        
         x = (int *)realloc(x, sizeof(int) * (len + 1));
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
@@ -336,6 +353,15 @@ void playGame() {
         // Display the new food position on the game board
         gotoxy(fx, fy);
         printf("%c", 148); // Change the character here to represent the food symbol
+
+        // Increase speed after every 4 foods eaten for easy level
+        if (level == 1) {
+            food_counter++;
+            if (food_counter == 4) {
+                speed -= 25; // Decrease speed by 25ms (increase speed)
+                food_counter = 0; // Reset food counter
+            }
+        }
     }
 }
 
@@ -350,7 +376,7 @@ void checkHighScore() {
 int main() {
     int option;
     char name[100];
-    system("color 17");
+    system("color E2");
     printf("Enter your name: ");
     scanf("%s", name);
     do {
