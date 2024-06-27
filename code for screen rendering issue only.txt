@@ -1,0 +1,15 @@
+ 
+//scanf(%c ,name);
+// Use fgets to capture the name, including spaces
+    fgets(name, sizeof(name), stdin);
+
+    // Remove the newline character from the name
+    size_t length = strlen(name);
+    if (name[length - 1] == '\n') {
+        name[length - 1] = '\0';
+    }
+
+    // Clear the input buffer to avoid issues with scanf later
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
