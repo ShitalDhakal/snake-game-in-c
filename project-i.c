@@ -3,9 +3,11 @@
 #include <time.h>
 #include <windows.h>
 #include <conio.h>
+#include <string.h>
 
 int i;
 int level = 1; // Global variable to store the game level
+char playerName[100]; // Global variable to store the player's name
 
 void displayInstructions();
 void gotoxy(int x, int y);
@@ -17,7 +19,9 @@ int check(int px, int py, int *x, int *y, int len);
 void over(int x, int y, int len);
 void playGame();
 void checkHighScore();
-void selectLevel(); 
+void selectLevel();
+void saveHighScore(char *name, int score);
+void readHighScores();
 
 void displayInstructions() {
     system("cls");
@@ -169,7 +173,7 @@ int checkWallCollision(int x, int y, int level) {
             (x >= 75 && x < 105 && (y == 6 || y == 21)) ||
             (x >= 50 && x < 70 && (y == 3 || y == 24)) ||
             (y >= 6 && y < 12 && (x == 15 || x == 105)) ||
-            (y >= 13 && y < 19 && (x == 15 || x == 105)) ||
+            (y >= 14 && y < 19 && (x == 15 || x == 105)) ||
             (y >= 9 && y < 19 && (x == 45 || x == 75))) {
             return 1; // Collision detected
         }
@@ -200,32 +204,30 @@ int check(int px, int py, int *x, int *y, int len) {
     return 0;
 }
 
-void over(int x, int y, int len) {
-    gotoxy(59,14);
-    printf("Game Over!!!\n");
-    gotoxy(59,15);
-    printf("%cScore : %d   ", 179, len - 4);
-    getch();
-    exit(0);
+void selectLevel() {
+    system("cls");
+    printf("Select Game Level:\n");
+    printf("1. Easy\n");
+    printf("2. Medium\n");
+    printf("3. Hard\n");
+    printf("Enter your choice: ");
+    scanf("%d", &level);
+    while (level < 1 || level > 3) {
+        printf("Invalid choice. Please enter a valid level (1, 2, or 3): ");
+        scanf("%d", &level);
+    }
 }
 
-void selectLevel() {
-    int choice;
-    do {
-        system("cls");
-        printf("\t\t\t\t\t\tSelect Level\n\n");
-        printf("\t\t\t\t\t 1. Easy\n\n");
-        printf("\t\t\t\t\t 2. Medium\n\n");
-        printf("\t\t\t\t\t 3. Hard\n\n");
-        printf("\t\t\t\t\t Enter your choice: ");
-        scanf("%d", &choice);
-        if (choice >= 1 && choice <= 3) {
-            level = choice;
-        } else {
-            printf("Invalid choice. Please enter a number between 1 and 3.\n");
-            getch(); // Wait for user input
-        }
-    } while (choice < 1 || choice > 3);
+void over(int x, int y, int len) {
+    int score = 0;
+    for (i = 0; i < len; i++) {
+        gotoxy(x + i, y);
+        printf(" ");
+    }
+    gotoxy(x, y);
+    printf("Game Over");
+    saveHighScore(playerName,score);
+    getch();
 }
 
 void playGame() {
@@ -234,16 +236,16 @@ void playGame() {
     boundary();
     drawWalls(level);
     srand(time(NULL));
+    int score = 0;
     int *x, *y, px, py, fx, fy, len = 4;
     char c = 'd', l = 'd';
-    clock_t t;
+    int speed;   // Determine initial speed based on level
     int speed_easy = 200; // Initial speed for easy level
     int speed_medium =170; // Initial speed for medium level
     int speed_hard = 140; // Initial speed for hard level
     int food_counter = 0; // Counter to track number of foods eaten
-
-    // Determine initial speed based on level
-    int speed;
+    clock_t t;
+    
     if (level == 1) {
         speed = speed_easy;
     } else if (level == 2) {
@@ -303,6 +305,7 @@ void playGame() {
                     printf("v");
                     if (y[0] >= 26 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                        return; // Return from playGame() after game over
                     }
                     break;
                 case 72: // Up
@@ -311,6 +314,7 @@ void playGame() {
                     printf("^");
                     if (y[0] < 2 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                        return; // Return from playGame() after game over
                     }
                     break;
                 case 75: // Left
@@ -319,6 +323,7 @@ void playGame() {
                     printf("<");
                     if (x[0] < 6 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                        return; // Return from playGame() after game over
                     }
                     break;
                 case 77: // Right
@@ -327,6 +332,7 @@ void playGame() {
                     printf(">");
                     if (x[0] >= 115 || checkWallCollision(x[0], y[0], level)) {
                         over(x[0], y[0], len);
+                        return; // Return from playGame() after game over
                     }
                     break;
                 default:
@@ -363,46 +369,114 @@ void playGame() {
             }
         }
     }
+    // Game over: Save the high score
+    saveHighScore(playerName, score);
 }
 
 void checkHighScore() {
     system("cls");
-    printf("\t\t\t\t\tChecking High Score.....\n\n");
-    printf("\nPress any key to go back to the menu...");
-    getch();  // Wait for user input
+    printf("View High Scores:\n");
+    printf("1. Easy\n");
+    printf("2. Medium\n");
+    printf("3. Hard\n");
+    printf("Enter your choice: ");
+    scanf("%d", &level);
+    while (level < 1 || level > 3) {
+        printf("Invalid choice. Please enter a valid level (1, 2, or 3): ");
+        scanf("%d", &level);
+    }
+    readHighScores();
+}
+
+void saveHighScore(char *name, int score) {
+    FILE *fp;
+    time_t t;
+    time(&t);
+
+    // Open the file for the selected level
+    if (level == 1) {
+        fp = fopen("highscore_easy.txt", "a");
+    } else if (level == 2) {
+        fp = fopen("highscore_medium.txt", "a");
+    } else {
+        fp = fopen("highscore_hard.txt", "a");
+    }
+
+    if (fp == NULL) {
+        printf("Error opening file for writing.\n");
+        return;
+    }
+
+    fprintf(fp, "%s %d %s", name, score, ctime(&t));
+    fclose(fp);
+}
+
+
+void readHighScores() {
+    FILE *fp;
+    char line[256];
+
+    // Open the file for the selected level
+    if (level == 1) {
+        fp = fopen("highscore_easy.txt", "r");
+    } else if (level == 2) {
+        fp = fopen("highscore_medium.txt", "r");
+    } else {
+        fp = fopen("highscore_hard.txt", "r");
+    }
+
+    if (fp == NULL) {
+        printf("Error opening file for reading.\n");
+        return;
+    }
+
+    system("cls");
+    printf("High Scores:\n");
+    printf("Name\tScore\tDate\n");
+
+    while (fgets(line, sizeof(line), fp)) {
+        printf("%s", line);
+    }
+
+    fclose(fp);
+    printf("\nPress any key to return to the main menu...");
+    getch();
     system("cls");
 }
 
 int main() {
-    int option;
-    char name[100];
+    int choice;
     system("color E2");
     printf("Enter your name: ");
-    scanf("%s", name);
-    do {
+    fgets(playerName, sizeof(playerName), stdin);
+    playerName[strcspn(playerName, "\n")] = '\0'; 
+    
+    while (1) {
         system("cls");
-        printf("\t\t\t\t\tWelcome to Snake Game\n\n");
-        printf("\t\t\t\t\t 1. Game Instruction\n\n");
-        printf("\t\t\t\t\t 2. Play Game\n\n");
-        printf("\t\t\t\t\t 3. Check High Score\n\n");
-        printf("\t\t\t\t\t 4. Exit\n\n"); 
-        printf("\t\t\t\t\t Enter your choice: ");
-        scanf("%d", &option);
-        switch (option) {
+        printf("\t\t\t\t\t\tSnake Game\n");
+        printf("\t\t\t\t\t\t1. Play Game\n");
+        printf("\t\t\t\t\t\t2. Game Instructions\n");
+        printf("\t\t\t\t\t\t3. View High Scores\n");
+        printf("\t\t\t\t\t\t4. Exit\n");
+        printf("\t\t\t\t\t\tEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
             case 1:
-                displayInstructions();
-                break;
-            case 2:
                 playGame();
                 break;
+            case 2:
+                displayInstructions();
+                break;
+            case 3:
+                checkHighScore();
+                break;
             case 4:
-                printf("\t\t\t\t\tExit\n");
-                break;
+                exit(0);
             default:
-                printf("Invalid choice. Please enter a number between 1 and 4.\n");
-                break;
+                printf("Invalid choice! Please try again.\n");
         }
-    } while (option != 4);
+    }
+
     return 0;
 }
-
