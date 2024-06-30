@@ -5,9 +5,16 @@
 #include <conio.h>
 #include <string.h>
 
-int i;
+int i,j;
 int level = 1; // Global variable to store the game level
 char playerName[100]; // Global variable to store the player's name
+
+typedef struct {
+    char name[100];
+    int score;
+    char date[100];
+} HighScore;
+
 
 void displayInstructions();
 void gotoxy(int x, int y);
@@ -219,16 +226,23 @@ void selectLevel() {
 }
 
 void over(int x, int y, int len) {
-    int score = 0;
-    for (i = 0; i < len; i++) {
-        gotoxy(x + i, y);
-        printf(" ");
-    }
-    gotoxy(x, y);
-    printf("Game Over");
-    saveHighScore(playerName,score);
-    getch();
+    system("cls");
+    int score= len -4;
+    gotoxy(50, 10);
+    printf("Game Over!");
+    gotoxy(50, 12);
+    printf("Your Score: %d", score);
+
+    // Save the high score
+    saveHighScore(playerName, score);
+
+    // Prompt to return to main menu
+    gotoxy(50, 20);
+    printf("Press any key to return to the main menu...");
+    getch();  // Wait for user input
+    system("cls");
 }
+
 
 void playGame() {
     system("cls");
@@ -236,9 +250,9 @@ void playGame() {
     boundary();
     drawWalls(level);
     srand(time(NULL));
-    int score = 0;
     int *x, *y, px, py, fx, fy, len = 4;
     char c = 'd', l = 'd';
+    int score;
     int speed;   // Determine initial speed based on level
     int speed_easy = 200; // Initial speed for easy level
     int speed_medium =170; // Initial speed for medium level
@@ -350,6 +364,9 @@ void playGame() {
         x = (int *)realloc(x, sizeof(int) * (len + 1));
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
+        // Increment the score
+        score += 10;
+
         // Generate new food position
         do {
             fx = ((rand() % 54) * 2) + 7;
@@ -415,6 +432,8 @@ void saveHighScore(char *name, int score) {
 void readHighScores() {
     FILE *fp;
     char line[256];
+    HighScore scores[100];  // Array to store high scores
+    int count = 0;
 
     // Open the file for the selected level
     if (level == 1) {
@@ -430,19 +449,37 @@ void readHighScores() {
         return;
     }
 
+    // Read scores from the file
+    while (fgets(line, sizeof(line), fp)) {
+        sscanf(line, "%s %d %[^\n]", scores[count].name, &scores[count].score, scores[count].date);
+        count++;
+    }
+    fclose(fp);
+
+    // Sort the scores in descending order
+    for ( i = 0; i < count - 1; i++) {
+        for (j = i + 1; j < count; j++) {
+            if (scores[i].score < scores[j].score) {
+                HighScore temp = scores[i];
+                scores[i] = scores[j];
+                scores[j] = temp;
+            }
+        }
+    }
+
+    // Display the top three scores
     system("cls");
     printf("High Scores:\n");
     printf("Name\tScore\tDate\n");
-
-    while (fgets(line, sizeof(line), fp)) {
-        printf("%s", line);
+    for (i = 0; i < count && i < 3; i++) {
+        printf("%s\t%d\t%s\n", scores[i].name, scores[i].score, scores[i].date);
     }
 
-    fclose(fp);
     printf("\nPress any key to return to the main menu...");
     getch();
     system("cls");
 }
+
 
 int main() {
     int choice;
