@@ -8,6 +8,7 @@
 int i,j;
 int level = 1; // Global variable to store the game level
 char playerName[100]; // Global variable to store the player's name
+char score_date[100]; // Global variable to store the score date
 
 typedef struct {
     char name[100];
@@ -28,6 +29,7 @@ void playGame();
 void checkHighScore();
 void selectLevel();
 void saveHighScore(char *name, int score);
+void HighScoresDescending(HighScore scores[], int count);
 void readHighScores();
 
 void displayInstructions() {
@@ -226,7 +228,6 @@ void selectLevel() {
 }
 
 void over(int x, int y, int len) {
-    system("cls");
     int score= len -4;
     gotoxy(50, 10);
     printf("Game Over!");
@@ -252,7 +253,7 @@ void playGame() {
     srand(time(NULL));
     int *x, *y, px, py, fx, fy, len = 4;
     char c = 'd', l = 'd';
-    int score;
+    int score = len -4 ;
     int speed;   // Determine initial speed based on level
     int speed_easy = 200; // Initial speed for easy level
     int speed_medium =170; // Initial speed for medium level
@@ -365,14 +366,15 @@ void playGame() {
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
         // Increment the score
-        score += 10;
+        score += len-4;
 
+      
         // Generate new food position
         do {
             fx = ((rand() % 54) * 2) + 7;
             fy = (rand() % 23) + 2;
         } while (checkWallCollision(fx, fy, level) || check(fx, fy, x, y, len));
-
+        
         // Display the new food position on the game board
         gotoxy(fx, fy);
         printf("%c", 148); // Change the character here to represent the food symbol
@@ -386,8 +388,6 @@ void playGame() {
             }
         }
     }
-    // Game over: Save the high score
-    saveHighScore(playerName, score);
 }
 
 void checkHighScore() {
@@ -405,29 +405,52 @@ void checkHighScore() {
     readHighScores();
 }
 
+void HighScoresDescending(HighScore scores[], int count) {
+    HighScore temp;
+    for ( i = 0; i < count - 1; i++) {
+        for (j = 0; j < count - i - 1; j++) {
+            if (scores[j].score < scores[j + 1].score) {
+                temp = scores[j];
+                scores[j] = scores[j + 1];
+                scores[j + 1] = temp;
+            }
+        }
+    }
+}
 void saveHighScore(char *name, int score) {
     FILE *fp;
     time_t t;
+    struct tm *timestamp;
     time(&t);
+    timestamp = localtime(&t);
 
-    // Open the file for the selected level
+    // Format the date and time
+    char score_date[20];
+    strftime(score_date, sizeof(score_date), "%Y-%m-%d %H:%M:%S", timestamp);
+
+    // Determine the file name based on the selected level
+    char filename[30];  // Adjust size based on your file names
     if (level == 1) {
-        fp = fopen("highscore_easy.txt", "a");
+        strcpy(filename, "easy_level_highscore.txt");
     } else if (level == 2) {
-        fp = fopen("highscore_medium.txt", "a");
+        strcpy(filename, "medium_level_highscore.txt");
     } else {
-        fp = fopen("highscore_hard.txt", "a");
+        strcpy(filename, "hard_level_highscore.txt");
     }
 
+    // Open the file in append mode
+    fp = fopen(filename, "a+");
     if (fp == NULL) {
         printf("Error opening file for writing.\n");
         return;
     }
 
-    fprintf(fp, "%s %d %s", name, score, ctime(&t));
+    // Write the score to the file
+    fprintf(fp, "%s %d %s\n", name, score, score_date);
     fclose(fp);
-}
 
+    printf("High score saved successfully.\n");
+}
 
 void readHighScores() {
     FILE *fp;
@@ -435,15 +458,18 @@ void readHighScores() {
     HighScore scores[100];  // Array to store high scores
     int count = 0;
 
-    // Open the file for the selected level
+    // Determine the file name based on the selected level
+    char filename[30];  // Adjust size based on your file names
     if (level == 1) {
-        fp = fopen("highscore_easy.txt", "r");
+        strcpy(filename, "easy_level_highscore.txt");
     } else if (level == 2) {
-        fp = fopen("highscore_medium.txt", "r");
+        strcpy(filename, "medium_level_highscore.txt");
     } else {
-        fp = fopen("highscore_hard.txt", "r");
+        strcpy(filename, "hard_level_highscore.txt");
     }
 
+    // Open the file for reading
+    fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Error opening file for reading.\n");
         return;
@@ -456,29 +482,21 @@ void readHighScores() {
     }
     fclose(fp);
 
-    // Sort the scores in descending order
-    for ( i = 0; i < count - 1; i++) {
-        for (j = i + 1; j < count; j++) {
-            if (scores[i].score < scores[j].score) {
-                HighScore temp = scores[i];
-                scores[i] = scores[j];
-                scores[j] = temp;
-            }
-        }
-    }
+   HighScoresDescending(scores,count);
 
-    // Display the top three scores
+    // Display the top scores
     system("cls");
     printf("High Scores:\n");
-    printf("Name\tScore\tDate\n");
+    printf("Rank\tName\t\tScore\tDate\n");
     for (i = 0; i < count && i < 3; i++) {
-        printf("%s\t%d\t%s\n", scores[i].name, scores[i].score, scores[i].date);
+        printf("%d\t%s\t\t%d\t%s\n", i + 1, scores[i].name, scores[i].score, scores[i].date);
     }
 
     printf("\nPress any key to return to the main menu...");
     getch();
     system("cls");
 }
+
 
 
 int main() {
@@ -517,3 +535,4 @@ int main() {
 
     return 0;
 }
+
