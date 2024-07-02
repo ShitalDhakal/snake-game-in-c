@@ -8,7 +8,7 @@
 int i,j;
 int level = 1; // Global variable to store the game level
 char playerName[100]; // Global variable to store the player's name
-char score_date[100]; // Global variable to store the score date
+
 
 typedef struct {
     char name[100];
@@ -24,7 +24,7 @@ void drawWalls(int level);
 int checkWallCollision(int x, int y, int level);
 void move(int *x, int *y, char *l, char c, int len);
 int check(int px, int py, int *x, int *y, int len);
-void over(int x, int y, int len);
+void over(int len);
 void playGame();
 void checkHighScore();
 void selectLevel();
@@ -44,7 +44,7 @@ void displayInstructions() {
     printf("\t 3. Avoid hitting the walls and the snake's own body to prevent the game from ending.\n\n");
     printf("\t 4. Pause the game at any time by pressing any key. Press any key again to resume.\n\n");
     printf("\t 5. Select the game level at the beginning:\n");
-    printf("\t\t- Easy: Slower speed at initial increase speed when start eat food.\n");
+    printf("\t- Easy: Slower speed at initial increase speed when start eat food.\n");
     printf("\t- Medium: More obstacles and moderate speed.\n");
     printf("\t- Hard: Complex obstacles and faster speed.\n\n");
     printf("\t Press any key to return to the main menu...");
@@ -227,7 +227,7 @@ void selectLevel() {
     }
 }
 
-void over(int x, int y, int len) {
+void over(int len) {
     int score= len -4;
     gotoxy(50, 10);
     printf("Game Over!");
@@ -260,7 +260,7 @@ void playGame() {
     int speed_hard = 140; // Initial speed for hard level
     int food_counter = 0; // Counter to track number of foods eaten
     clock_t t;
-    
+
     if (level == 1) {
         speed = speed_easy;
     } else if (level == 2) {
@@ -319,7 +319,7 @@ void playGame() {
                     gotoxy(x[0], ++y[0]);
                     printf("v");
                     if (y[0] >= 26 || checkWallCollision(x[0], y[0], level)) {
-                        over(x[0], y[0], len);
+                        over(len);
                         return; // Return from playGame() after game over
                     }
                     break;
@@ -328,7 +328,7 @@ void playGame() {
                     gotoxy(x[0], --y[0]);
                     printf("^");
                     if (y[0] < 2 || checkWallCollision(x[0], y[0], level)) {
-                        over(x[0], y[0], len);
+                        over(len);
                         return; // Return from playGame() after game over
                     }
                     break;
@@ -337,7 +337,7 @@ void playGame() {
                     gotoxy(x[0] = x[0] - 2, y[0]);
                     printf("<");
                     if (x[0] < 6 || checkWallCollision(x[0], y[0], level)) {
-                        over(x[0], y[0], len);
+                        over(len);
                         return; // Return from playGame() after game over
                     }
                     break;
@@ -346,7 +346,7 @@ void playGame() {
                     gotoxy(x[0] = x[0] + 2, y[0]);
                     printf(">");
                     if (x[0] >= 115 || checkWallCollision(x[0], y[0], level)) {
-                        over(x[0], y[0], len);
+                        over(len);
                         return; // Return from playGame() after game over
                     }
                     break;
@@ -355,26 +355,26 @@ void playGame() {
             }
             for (i = 4; i < len; i++) {
                 if (x[0] == x[i] && y[0] == y[i])
-                    over(x[0], y[0], len);
+                    over(len);
             }
         } while (x[0] != fx || y[0] != fy);
-        
+
         gotoxy(x[len], y[len]);
         len++;
-        
+
         x = (int *)realloc(x, sizeof(int) * (len + 1));
         y = (int *)realloc(y, sizeof(int) * (len + 1));
 
         // Increment the score
         score += len-4;
 
-      
+
         // Generate new food position
         do {
             fx = ((rand() % 54) * 2) + 7;
             fy = (rand() % 23) + 2;
         } while (checkWallCollision(fx, fy, level) || check(fx, fy, x, y, len));
-        
+
         // Display the new food position on the game board
         gotoxy(fx, fy);
         printf("%c", 148); // Change the character here to represent the food symbol
@@ -482,7 +482,7 @@ void readHighScores() {
     }
     fclose(fp);
 
-   HighScoresDescending(scores,count);
+    HighScoresDescending(scores,count);
 
     // Display the top scores
     system("cls");
@@ -504,8 +504,8 @@ int main() {
     system("color E2");
     printf("Enter your name: ");
     fgets(playerName, sizeof(playerName), stdin);
-    playerName[strcspn(playerName, "\n")] = '\0'; 
-    
+    playerName[strcspn(playerName, "\n")] = '\0';
+
     while (1) {
         system("cls");
         printf("\t\t\t\t\t\tSnake Game\n");
@@ -535,4 +535,3 @@ int main() {
 
     return 0;
 }
-
