@@ -44,7 +44,7 @@ void displayInstructions() {
     printf("\t 3. Avoid hitting the walls and the snake's own body to prevent the game from ending.\n\n");
     printf("\t 4. Pause the game at any time by pressing any key. Press any key again to resume.\n\n");
     printf("\t 5. Select the game level at the beginning:\n");
-    printf("\t\t- Easy: Slower speed initially, speed increases when snake eats 4 foods.\n");
+    printf("\t\t- Easy: Slower speed initially, speed increases when snake eats 5 foods.\n");
     printf("\t\t- Medium: More obstacles and moderate speed.\n");
     printf("\t\t- Hard: Complex obstacles and faster speed.\n\n");
     printf("\t 6. Check the high scores after each game to see if you made it to the top!\n\n");
@@ -52,7 +52,6 @@ void displayInstructions() {
     getch();  // Wait for user input
     system("cls");
 }
-
 
 void gotoxy(int x, int y) {
     COORD p;
@@ -180,7 +179,7 @@ int checkWallCollision(int x, int y, int level) {
         }
     } else if (level == 3) {
         // Hard level walls
-        if ((x >= 17 && x < 45 && (y == 6 || y == 21)) ||
+        if ((x >= 15 && x < 45 && (y == 6 || y == 21)) ||
             (x >= 75 && x < 105 && (y == 6 || y == 21)) ||
             (x >= 50 && x < 70 && (y == 3 || y == 24)) ||
             (y >= 6 && y < 12 && (x == 15 || x == 105)) ||
@@ -217,10 +216,10 @@ int check(int px, int py, int *x, int *y, int len) {
 
 void selectLevel() {
     system("cls");
-    printf("Select Game Level:\n\n");
-    printf("1. Easy\n\n");
-    printf("2. Medium\n\n");
-    printf("3. Hard\n\n");
+    printf("\t\t\t\t\t\tSelect Game Level:\n\n");
+    printf("\t\t\t\t\t\t1. Easy\n\n");
+    printf("\t\t\t\t\t\t2. Medium\n\n");
+    printf("\t\t\t\t\t\t3. Hard\n\n");
     printf("\t\t\t\t\t\tEnter your choice: ");
     scanf("%d", &level);
     while (level < 1 || level > 3) {
@@ -256,9 +255,9 @@ void playGame() {
     char c = 'd', l = 'd';
     int score = len -4 ;
     int speed;   // Determine initial speed based on level
-    int speed_easy = 200; // Initial speed for easy level
-    int speed_medium =170; // Initial speed for medium level
-    int speed_hard = 140; // Initial speed for hard level
+    int speed_easy = 170; // Initial speed for easy level
+    int speed_medium =130; // Initial speed for medium level
+    int speed_hard = 110; // Initial speed for hard level
     int food_counter = 0; // Counter to track number of foods eaten
     clock_t t;
     
@@ -312,9 +311,6 @@ void playGame() {
             }
 
             switch (c) {
-                case 0:
-                case 111:
-                    break;
                 case 80: // Down
                     move(x, y, &l, c, len);
                     gotoxy(x[0], ++y[0]);
@@ -369,7 +365,6 @@ void playGame() {
         // Increment the score
         score += len-4;
 
-      
         // Generate new food position
         do {
             fx = ((rand() % 54) * 2) + 7;
@@ -380,11 +375,11 @@ void playGame() {
         gotoxy(fx, fy);
         printf("%c", 148); // Change the character here to represent the food symbol
 
-        // Increase speed after every 4 foods eaten for easy level
+        // Increase speed after every 5 foods eaten for easy level
         if (level == 1) {
             food_counter++;
-            if (food_counter == 4) {
-                speed -= 25; // Decrease speed by 25ms (increase speed)
+            if (food_counter == 5) {
+                speed -= 15; // Decrease speed by 15ms (increase speed)
                 food_counter = 0; // Reset food counter
             }
         }
@@ -393,11 +388,11 @@ void playGame() {
 
 void checkHighScore() {
     system("cls");
-    printf("View High Scores:\n\n");
-    printf("1. Easy\n\n");
-    printf("2. Medium\n\n");
-    printf("3. Hard\n\n");
-    printf("Enter your choice: ");
+    printf("\t\t\t\t\t\tView High Scores:\n\n");
+    printf("\t\t\t\t\t\t1. Easy\n\n");
+    printf("\t\t\t\t\t\t2. Medium\n\n");
+    printf("\t\t\t\t\t\t3. Hard\n\n");
+    printf("\t\t\t\t\t\tEnter your choice: ");
     scanf("%d", &level);
     while (level < 1 || level > 3) {
         printf("Invalid choice. Please enter a valid level (1, 2, or 3): ");
@@ -485,18 +480,16 @@ void readHighScores() {
 
     // Display the top scores
     system("cls");
-    printf("\t\tHigh Scores:\n\n");
-    printf("Rank\tName\tScore\tDate\n");
+    printf("High Scores:\n\n");
+    printf("Rank\tName\tScore\tDate \n");
     for (i = 0; i < count && i < 3; i++) {
-        printf("%d\t%s\t%d\t%s\n", i + 1, scores[i].name, scores[i].score, scores[i].date);
+        printf("%d\t%s\t\t%d\t%s\n", i + 1, scores[i].name, scores[i].score, scores[i].date);
     }
 
     printf("\nPress any key to return to the main menu...");
     getch();
     system("cls");
 }
-
-
 
 int main() {
     int choice;
@@ -529,11 +522,8 @@ int main() {
                 exit(0);
             default:
                 printf("Invalid choice! Please try again.\n");
-                getch();  // Wait for user input before showing the menu again
-                break;
         }
     }
     return 0;
 }
-
 
